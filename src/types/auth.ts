@@ -21,3 +21,9 @@ export interface ChangePasswordRequest {
   confirmNewPassword: string;
 }
 
+export interface FirstLoginChangePasswordRequest {
+  newPassword: string;
+  confirmPassword: string;
+}
+
+
