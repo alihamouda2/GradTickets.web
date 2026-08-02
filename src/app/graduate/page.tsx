@@ -25,6 +25,8 @@ import { GraduateService } from "@/services/graduate-service";
 import { GeneratedTicketItem, getTicketStatusInfo } from "@/types/graduate";
 import { ChangePasswordModal } from "@/components/auth/ChangePasswordModal";
 import { FirstLoginChangePasswordModal } from "@/components/auth/FirstLoginChangePasswordModal";
+import { InvitationCardModal } from "@/components/graduate/InvitationCardModal";
+
 
 export default function GraduatePage() {
   const [userName, setUserName] = useState<string>("الخريج");
@@ -466,153 +468,17 @@ export default function GraduatePage() {
         )}
       </main>
 
-      {/* 6. SINGLE TICKET DETAILS MODAL (GET /api/Graduate/tickets/{id}) */}
-      {selectedTicketId && (
-        <div className="fixed inset-0 z-50 bg-slate-950/70 backdrop-blur-md flex items-center justify-center p-4">
-          <div className="bg-white rounded-3xl max-w-md w-full p-6 space-y-6 shadow-2xl animate-in fade-in zoom-in duration-200">
-            {/* Modal Header */}
-            <div className="flex items-center justify-between border-b border-slate-100 pb-4">
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-2xl bg-slate-900 text-white flex items-center justify-center font-bold">
-                  <Ticket className="w-5 h-5 text-amber-400" />
-                </div>
-                <div>
-                  <h3 className="font-bold text-slate-900 text-base">تفاصيل التذكرة الرقمية</h3>
-                  <p className="text-xs text-slate-400">
-                    جلب من <code className="dir-ltr inline-block">GET /api/Graduate/tickets/{selectedTicketId}</code>
-                  </p>
-                </div>
-              </div>
-              <button
-                onClick={() => {
-                  setSelectedTicketId(null);
-                  setSelectedTicket(null);
-                }}
-                className="p-1.5 text-slate-400 hover:text-slate-700 rounded-xl hover:bg-slate-100 transition-colors"
-              >
-                <X className="w-5 h-5" />
-              </button>
-            </div>
-
-            {/* Modal Content */}
-            {loadingModal ? (
-              <div className="py-12 text-center space-y-3">
-                <RefreshCw className="w-8 h-8 text-amber-500 animate-spin mx-auto" />
-                <p className="text-xs text-slate-500 font-semibold">
-                  جاري جلب بيانات التذكرة #{selectedTicketId} من الباك إند...
-                </p>
-              </div>
-            ) : modalError ? (
-              <div className="p-4 bg-rose-50 border border-rose-200 rounded-2xl text-rose-800 text-xs space-y-2">
-                <div className="flex items-center gap-2">
-                  <AlertTriangle className="w-4 h-4 text-rose-600 shrink-0" />
-                  <span>{modalError}</span>
-                </div>
-              </div>
-            ) : selectedTicket ? (
-              <div className="space-y-6">
-                {/* Printable Ticket Card */}
-                <div id="printable-ticket" className="bg-gradient-to-b from-slate-900 to-slate-950 p-6 rounded-3xl text-white space-y-5 shadow-xl border border-slate-800">
-                  {/* Status Banner */}
-                  <div className="flex items-center justify-between border-b border-slate-800 pb-4">
-                    <div className="flex items-center gap-2">
-                      <GraduationCap className="w-5 h-5 text-amber-400" />
-                      <span className="font-bold text-xs text-slate-200">تذكرة حفل التخرج</span>
-                    </div>
-
-                    {/* Status Badge in Arabic */}
-                    {(() => {
-                      const statusInfo = getTicketStatusInfo(selectedTicket.status);
-                      return (
-                        <span className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold border ${statusInfo.badgeBg}`}>
-                          <span className={`w-2 h-2 rounded-full ${statusInfo.dotColor}`} />
-                          <span>{statusInfo.label}</span>
-                        </span>
-                      );
-                    })()}
-                  </div>
-
-                  {/* QR Display */}
-                  <div className="bg-white p-4 rounded-2xl text-center shadow-inner">
-                    {/* eslint-disable-next-line @next/next/no-img-element */}
-                    <img
-                      src={`https://api.qrserver.com/v1/create-qr-code/?size=220x220&data=${encodeURIComponent(
-                        selectedTicket.ticketCode
-                      )}`}
-                      alt={`QR ${selectedTicket.ticketCode}`}
-                      className="w-48 h-48 mx-auto object-contain"
-                    />
-                  </div>
-
-                  {/* Ticket Code & Dates (No Graduate Name Displayed) */}
-                  <div className="space-y-3 text-center">
-                    <div className="bg-slate-800/80 p-3 rounded-2xl border border-slate-700/80 space-y-1">
-                      <p className="font-mono text-base font-extrabold text-amber-400 tracking-wider dir-ltr">
-                        {selectedTicket.ticketCode}
-                      </p>
-                    </div>
-
-                    <div className="grid grid-cols-2 gap-2 text-right text-xs bg-slate-900/60 p-3 rounded-2xl border border-slate-800">
-                      <div>
-                        <span className="text-[10px] text-slate-400 block">تاريخ الإصدار:</span>
-                        <span className="text-[11px] text-slate-300">{formatDate(selectedTicket.createdAt)}</span>
-                      </div>
-                      <div>
-                        <span className="text-[10px] text-slate-400 block">تاريخ المسح:</span>
-                        <span className="text-[11px] text-slate-300">{formatDate(selectedTicket.scannedAt)}</span>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Status Explanation */}
-                <div className="p-3.5 bg-slate-50 border border-slate-200/80 rounded-2xl text-xs text-slate-600 flex items-start gap-2">
-                  <Sparkles className="w-4 h-4 text-amber-500 shrink-0 mt-0.5" />
-                  <p>{getTicketStatusInfo(selectedTicket.status).description}</p>
-                </div>
-
-                {/* Modal Action Buttons */}
-                <div className="flex items-center gap-2 pt-2">
-                  <button
-                    onClick={() => handleCopyCode(selectedTicket.ticketCode)}
-                    className="flex-1 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-800 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-1.5 cursor-pointer"
-                  >
-                    {copiedCode === selectedTicket.ticketCode ? (
-                      <>
-                        <Check className="w-4 h-4 text-emerald-600" />
-                        <span>تم النسخ!</span>
-                      </>
-                    ) : (
-                      <>
-                        <Copy className="w-4 h-4" />
-                        <span>نسخ الرمز</span>
-                      </>
-                    )}
-                  </button>
-
-                  <button
-                    onClick={handlePrintTicket}
-                    className="flex-1 py-2.5 bg-amber-500 hover:bg-amber-600 text-slate-950 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-1.5 cursor-pointer shadow-md"
-                  >
-                    <Printer className="w-4 h-4" />
-                    <span>طباعة التذكرة</span>
-                  </button>
-
-                  <button
-                    onClick={() => {
-                      setSelectedTicketId(null);
-                      setSelectedTicket(null);
-                    }}
-                    className="py-2.5 px-4 bg-slate-900 hover:bg-slate-800 text-white rounded-xl text-xs font-semibold transition-colors cursor-pointer"
-                  >
-                    إغلاق
-                  </button>
-                </div>
-              </div>
-            ) : null}
-          </div>
-        </div>
-      )}
+      {/* 6. LUXURY 1080x1920 INVITATION CARD MODAL WITH PDF EXPORT */}
+      <InvitationCardModal
+        isOpen={!!selectedTicketId}
+        ticket={selectedTicket}
+        loading={loadingModal}
+        error={modalError}
+        onClose={() => {
+          setSelectedTicketId(null);
+          setSelectedTicket(null);
+        }}
+      />
 
       {/* 7. CHANGE PASSWORD MODAL */}
       <ChangePasswordModal
